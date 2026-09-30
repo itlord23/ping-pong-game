@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ping Pong CT</title>
+
+    <link rel="stylesheet" href="./assets/css/style.css">
+
+    <!-- Link font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css" integrity="sha512-QeR2VH+lsBE5LSAe1Q5EnTBbe7XTBubt8dG93Y7gidSgdMCr8nVqKcfKAMyN96SV8KDbZVTDXChatu5G2KQGzg==" crossorigin="anonymous" referrerpolicy="no-referrer">
+</head>
+<body>
+    <div class="wrapped theme-neon">
+        <div class="container">
+            <div>
+                <button class="toggle-btn" id="theme-switcher">Retro Arcade</button>
+            </div>
+
+            <header class="header">
+                <div class="header__box">
+                    <span class="header__label">LEVEL</span>
+                    <span id="level-value" class="header__value">01</span>
+                </div>
+
+                <div class="header__box">
+                    <h1 class="header__heading">PING PONG</h1>
+                </div>
+
+                <div class="header__box">
+                    <span class="header__label">SCORE</span>
+                    <span id="score-value" class="header__value">0000</span>
+                </div>
+            </header>
+
+            <div class="canvas-wrapper">
+                <canvas id="gameCanvas" width="800" height="500"></canvas>
+                
+                <div id="overlay-screen" class="overlay">
+                    <h2 id="overlay-title" class="overlay__heading">PONG PONG PONG</h2>
+                    <p id="overlay-subtitle" class="overlay__subtitle">Điều khiển thanh đỡ bằng Chuột hoặc phím A / D</p>
+                    <button id="start-btn" class="btn">BẮT ĐẦU CHƠI</button>
+                    <button id="cont-btn" class="btn">TIẾP TỤC (LEVEL <span>5</span>)</button>
+                </div>
+            </div>
+
+            <footer class="footer">
+                <span>
+                    <kbd>A</kbd> 
+                    <kbd>D</kbd> / 
+                    <kbd><i class="fa-solid fa-arrow-left"></i></kbd> 
+                    <kbd><i class="fa-solid fa-arrow-right"></i></kbd> 
+                    Di chuyển
+                    <kbd>ESC</kbd> Tạm dừng
+                </span>
+            </footer>
+        </div>
+    </div>
+
+    <script type="module" src="./assets/js/script.js"></script>
+</body>
+</html>

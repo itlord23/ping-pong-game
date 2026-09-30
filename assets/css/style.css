@@ -1,0 +1,296 @@
+* {
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 62.5%;
+}
+
+body {
+    font-size: 1.6rem;
+    font-family: 'Orbitron', sans-serif;
+}
+
+:root {
+    --neon-bg: #080811;
+    --white-color: #fff;
+    --border-color: #00f0ff;
+    --arcade-bg: #33ff00;
+    --black-color: #000;
+}
+
+input,
+select,
+button,
+textarea {
+    font-family: inherit;
+    font-size: inherit;
+}
+
+a {
+    text-decoration: none;
+}
+
+.wrapped {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    user-select: none;
+    transition: background-color 0.3s ease;
+}
+
+.wrapped.theme-neon {
+    background-color: var(--neon-bg);
+    color: var(--white-color);
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.toggle-btn {
+    margin-bottom: 4px;
+    padding: 8px 12px;
+    background: transparent;
+    border: 1px solid currentColor;
+    border-radius: 6px;
+    font-size: 1.2rem;
+    color: inherit;
+    cursor: pointer;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    width: 800px;
+    align-items: center;
+}
+
+.canvas-wrapper {
+    position: relative;
+    overflow: hidden;
+}
+
+#gameCanvas {
+    display: block;
+}
+
+.theme-neon .header__box {
+    padding: 6px 20px;
+    background: #121225;
+    border: 2px solid ;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    text-align: center;
+}
+
+.theme-neon .header__label {
+    margin-bottom: 4px;
+    display: block;
+    font-size: 1rem;
+    color: #ff0055;
+    letter-spacing: 2px;
+}
+
+.theme-neon .header__value {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--border-color);
+    text-shadow: 0 0 8px var(--border-color);
+}
+
+.theme-neon .header__heading {
+    font-size: 2.8rem;
+    color: #ffe600;
+    text-shadow: 0 0 12px #ffe600;
+    letter-spacing: 4px;
+}
+
+.theme-neon .canvas-wrapper {
+    border-radius: 12px;
+    border: 3px solid var(--border-color);
+    box-shadow: 0 0 25px rgba(0, 240, 255, 0.25);
+}
+
+.theme-neon #gameCanvas {
+    background-color: #05050a;
+}
+
+.theme-neon .overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(8, 8, 17, 0.85);
+    backdrop-filter: blur(5px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+}
+
+.theme-neon .btn {
+    padding: 12px 30px;
+    background: #9a0034;
+    color: #fff;
+    border: none;
+    font-size: 1.5rem;
+    font-weight: 700;
+    border-radius: 6px;
+    box-shadow: 0 0 15px rgba(255, 0, 85, 0.6);
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+}
+
+.theme-neon .btn:hover {
+    background: #ff0055;
+    transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(255, 0, 85, 0.9);
+}
+
+.overlay__subtitle {
+    pointer-events: none;
+    animation: fadeOut 10s ease-in-out forwards;
+}
+
+.footer span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.footer kbd {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2rem;
+}
+
+.footer kbd i {
+    font-size: 1rem;
+}
+
+.theme-neon kbd {
+    padding: 4px 6px;
+    background: #1a1a3a;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--border-color);
+}
+
+/* Phong cách retro arcade 8 bit */
+.wrapped.theme-arcade {
+    background-color: var(--black-color);
+    color: var(--arcade-bg);
+    font-family: 'Press Start 2P', monospace;
+}
+
+.theme-arcade .header__box {
+    padding: 8px 16px;
+    border: 3px solid var(--arcade-bg);
+    text-align: center;
+}
+
+.theme-arcade .header__label {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--white-color);
+}
+
+.theme-arcade .header__value {
+    font-size: 1.8rem;
+    color: #ffff00;
+}
+
+.theme-arcade .header__heading {
+    font-size: 1.8rem;
+    color: var(--arcade-bg);
+}
+
+.theme-arcade .canvas-wrapper {
+    border: 5px solid var(--arcade-bg);
+}
+
+.theme-arcade #gameCanvas {
+    background-color: var(--black-color);
+}
+
+.theme-arcade .overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.92);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    text-align: center;
+}
+
+.theme-arcade .overlay__heading {
+    font-size: 2.2rem;
+    color: #ffff00;
+}
+
+.theme-arcade .overlay__subtitle {
+    font-size: 1.4rem;
+    line-height: 1.6;
+}
+
+.theme-arcade .btn {
+    padding: 14px 24px;
+    background: var(--arcade-bg);
+    color: var(--black-color);
+    border: none;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 1.2rem;
+    opacity: 0.9;
+    cursor: pointer;
+}
+
+.theme-arcade .btn:hover {
+    background: #ffff00;
+}
+
+.theme-arcade kbd {
+    padding: 2px 6px;
+    border: 1px solid var(--arcade-bg);
+    color: #ffff00;
+}
+
+/* KeyFrame */
+@keyframes fadeOut {
+    0% {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    10% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    25% {
+        opacity: 0.4;
+    }
+
+    40% {
+        opacity: 1;
+    }
+
+    55% {
+        opacity: 0.4;
+    }
+
+    80% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
