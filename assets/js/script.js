@@ -3,16 +3,22 @@ import { audioManager } from "./audio.js";
 import { themeManager } from "./theme.js";
 import { paddle } from "./entities/Paddle.js";
 import { ball } from "./entities/Ball.js";
+import { levels } from "./levelconfig.js";
 
 const app = {
     elements: {
         startBtn: document.getElementById("start-btn"),
+        contBtn: document.getElementById("cont-btn"),
         toggleBtn: document.getElementById("theme-switcher"),
+        title: document.getElementById("overlay-title"),
         subtitle: document.getElementById("overlay-subtitle"),
         overlayScreen: document.getElementById("overlay-screen"),
         heading: document.querySelector('.header__box .header__heading'),
         footer: document.querySelector('.footer'),
-        tuong: document.getElementById('gameCanvas')
+        tuong: document.getElementById('gameCanvas'),
+        diem: document.getElementById('score-value'),
+        mission: document.getElementById('mission-text'),
+        levelValue: document.getElementById('level-value')
     },
 
     states: {
@@ -22,12 +28,37 @@ const app = {
         animationId: null
     },
 
+    getCurrentLevel() {
+        return levels[this.states.level - 1];
+    },
+
     startGame() {
+        if(this.elements.levelValue) {
+            this.elements.levelValue.textContent = '01';
+        }
+        this.startLevel();
+    },
+
+    startLevel() {
+        this.states.score = 0;
+        this.elements.diem.textContent = this.states.score;
+        // khởi tạo level
+        const currentLevel = this.getCurrentLevel();
+        if(currentLevel) {
+            currentLevel.init(this);
+
+            this.elements.heading.style.display = 'none';
+            this.elements.mission.style.display = 'block';
+            this.elements.mission.textContent = currentLevel.missionText;
+        }
+
+        // tạo nút chuyển màn
+
         this.states.gameState = 'playing';
 
         /** ẩn e */
         this.elements.toggleBtn.style.display = 'none';
-        this.elements.heading.parentElement.style.display = 'none';
+        // this.elements.heading.parentElement.style.display = 'none';
         this.elements.overlayScreen.style.display = 'none';
         this.elements.footer.style.display = 'none';
 
@@ -37,6 +68,7 @@ const app = {
 
         /** đổi nhạc */
         audioManager.play(themeManager.currentTheme, 'game');
+
         if(!this.states.animationId) {
             this.loop();
         }
@@ -53,6 +85,11 @@ const app = {
             canvas.height
         );
 
+        const currentLevel = this.getCurrentLevel();
+        if(currentLevel) {
+            currentLevel.draw(contextCv);
+        }
+
         if(this.states.gameState === 'playing' || this.states.gameState === 'pause') {
             paddle.draw(contextCv);
             // vẽ bóng
@@ -68,6 +105,15 @@ const app = {
         }
 
         // hiển thị lại UI
+        // hiển thị điểm kỷ lục
+        if(audioManager.activeTrack) {
+            audioManager.activeTrack.pause();
+        }
+
+        this.elements.title.textContent = "Bạn đã thua!";
+        this.elements.startBtn.textContent = 'Chơi lại';
+        this.elements.contBtn.textContent = 'Về Menu';
+        this.elements.overlayScreen.style.display = 'flex';
     },
 
     handleCollisions() {
@@ -98,13 +144,47 @@ const app = {
         }
     },
 
+    handleComplete() {
+        this.states.gameState = 'levelcomplete';
+
+        if(this.states.animationId) {
+            cancelAnimationFrame(this.states.animationId);
+            this.states.animationId = null;
+        }
+
+        this.elements.title.textContent = this.getCurrentLevel().aura_text;
+        this.elements.startBtn.textContent = 'Chơi tiếp';
+        
+        this.elements.contBtn.textContent = 'Về Menu';
+        this.elements.overlayScreen.style.display = 'flex';
+    },
+
+    nextLevel() {
+        this.states.level += 1;
+        if(this.elements.levelValue) {
+            this.elements.levelValue.textContent = String(this.states.level).padStart(2, '0');
+        }
+        this.startLevel();
+    },
+
     update() {
         if(this.states.gameState !== 'playing') return;
+
+        const currentLevel = this.getCurrentLevel();
+        if(currentLevel) {
+            currentLevel.update(this);
+
+            if(currentLevel.checkWin(this)) {
+                this.handleComplete();
+            }
+        }
 
         // cập nhật cho paddle
         paddle.update(this.elements.tuong.width);
         // cập nhật cho bóng
         ball.update(this.elements.tuong.width, this.elements.tuong.height);
+        // cập nhật điểm số, level
+        this.elements.diem.textContent = this.states.score;
         // xử lý va chạm collition trong game
         this.handleCollisions();
     },
@@ -119,7 +199,15 @@ const app = {
     handleEvents() {
         const {startBtn, toggleBtn, subtitle} = this.elements;
         startBtn.addEventListener('click', () => {
-            this.startGame();
+            switch (this.states.gameState) {
+                case 'menu':
+                case 'gameover':
+                    this.startGame();
+                    break;
+                case 'levelcomplete':
+                    this.nextLevel();
+                    break;
+            }
             if(subtitle) {
                 subtitle.style.display = "none";
             }
