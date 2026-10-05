@@ -6,6 +6,8 @@ import { ball } from "./entities/Ball.js";
 import { levels } from "./levelconfig.js";
 
 const app = {
+    ball,
+    paddle,
     elements: {
         startBtn: document.getElementById("start-btn"),
         contBtn: document.getElementById("cont-btn"),
@@ -134,7 +136,12 @@ const app = {
             ball.dy = -ball.speed * Math.cos(bounceAngle);
 
             ball.y = paddle.y - ball.radius; // Đặt lại vị trí của bóng để tránh va chạm liên tục
-            this.states.score += 10;
+            // this.states.score += 10;
+
+            const currentLevel = this.getCurrentLevel();
+            if(currentLevel && currentLevel.onPaddleHit) {
+                currentLevel.onPaddleHit(this);
+            }
         }
         // va chạm bóng - 3 tường
         // va chạm bóng - vật khác (màn sau)
@@ -185,6 +192,7 @@ const app = {
         ball.update(this.elements.tuong.width, this.elements.tuong.height);
         // cập nhật điểm số, level
         this.elements.diem.textContent = this.states.score;
+        this.elements.levelValue.textContent = String(this.states.level).padStart(2, '0');
         // xử lý va chạm collition trong game
         this.handleCollisions();
     },
