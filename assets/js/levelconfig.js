@@ -24,7 +24,7 @@ export const levels = [
         checkWin(app) {
             return app.states.score >= 100;
         },
-        aura_text: `Thật là bá khí! Qua màn 1`
+        aura_text: `Kiên nhẫn mới tạo ra kim cương! Qua màn 1`
     },
     {
         level: 2,
@@ -154,6 +154,118 @@ export const levels = [
         checkWin(app) {
             return this.appleCollected;
         },
-        aura_text: `Anh Long, Anh Long! Qua màn 2`
+        aura_text: `Gong Xi! Qua màn 2`
+    },
+    {
+        level: 3,
+        missionText: 'Nhiệm vụ: Hạ gục con boss trước khi nó giết bạn',
+        boss: null,
+        bullets: [],
+        lastShotTime: 0,
+        shootInterval: 90,
+        init(app) {
+            this.bullets = [];
+            this.boss = {
+                x: app.elements.tuong.width / 2 - 45,
+                y: 40,
+                width: 80,
+                height: 35,
+                speedX: 4.5,
+                hp: 5,
+                maxHp: 5
+            }
+        },
+
+        update(app) {
+            const { ball, paddle } = app;
+            if(!this.boss || this.boss.hp <= 0) return;
+            // di chuyển của boss
+            this.boss.x += this.boss.speedX;
+            if(this.boss.x <= 0 || this.boss.x + this.boss.width >= app.elements.tuong.width) {
+                this.boss.speedX *= -1; // đảo chiều
+            }
+            const hitBossX = ball.x + ball.radius >= this.boss.x &&
+                        ball.x - ball.radius <= this.boss.x + this.boss.width;
+            const hitBossY = ball.y + ball.radius >= this.boss.y &&
+                        ball.y - ball.radius <= this.boss.y + this.boss.height;
+
+            if(hitBossX && hitBossY) {
+                ball.dy = -ball.dy;
+                ball.y = this.boss.y + this.boss.height + ball.radius;
+                this.boss.hp -= 1;
+
+                app.states.score += 20;
+
+                if(app.elements.diem) {
+                    app.elements.diem.textContent = app.states.score;
+                }
+            }
+
+            // boss bắn đạn xuống
+            this.lastShotTime++;
+            if(this.lastShotTime >= this.shootInterval) {
+                this.lastShotTime = 0;
+                this.bullets.push({
+                    x: this.boss.x + this.boss.width / 2 - 3,
+                    y: this.boss.y + this.boss.height,
+                    width: 6,
+                    height: 15,
+                    speedY: 4
+                });
+            }
+
+            // xử lý đan va chạm với bệ đỡ
+            for (let index = this.bullets.length - 1; index >= 0; index--) {
+                const element = this.bullets[index];
+                element.y += element.speedY;
+
+                const hitPaddleX = element.x + element.width >= paddle.x && 
+                               element.x <= paddle.x + paddle.width;
+                const hitPaddleY = element.y + element.height >= paddle.y && 
+                               element.y <= paddle.y + paddle.height;
+
+                if (hitPaddleX && hitPaddleY) {
+                    app.handleGameOver();
+                    return;
+                }
+
+                if (element.y > app.elements.tuong.height) {
+                    this.bullets.splice(index, 1);
+                }
+            }
+        },
+
+        draw(contextCv) {
+            if (!this.boss || this.boss.hp <= 0) return;
+
+            contextCv.fillStyle = '#ff0055';
+            contextCv.fillRect(this.boss.x, this.boss.y, this.boss.width, this.boss.height);
+            contextCv.strokeStyle = '#ffffff';
+            contextCv.lineWidth = 2;
+            contextCv.strokeRect(this.boss.x, this.boss.y, this.boss.width, this.boss.height);
+
+            const hpBarW = this.boss.width;
+            const hpRatio = this.boss.hp / this.boss.maxHp;
+
+            contextCv.fillStyle = 'rgba(0, 0, 0, 0.42)';
+            contextCv.fillRect(this.boss.x, this.boss.y - 12, hpBarW, 6);
+
+            contextCv.fillStyle = hpRatio > 0.4 ? '#00ff66' : '#ff2200';
+            contextCv.fillRect(this.boss.x, this.boss.y - 12, hpBarW * hpRatio, 6);
+
+            // vẽ đạn
+            contextCv.fillStyle = '#ffea00';
+            this.bullets.forEach(b => {
+                contextCv.fillRect(b.x, b.y, b.width, b.height);
+                contextCv.strokeStyle = '#ff2200';
+                contextCv.lineWidth = 1;
+                contextCv.strokeRect(b.x, b.y, b.width, b.height);
+            });
+        },
+
+        checkWin(app) {
+            return this.boss && this.boss.hp <= 0;
+        },
+        aura_text: `Bạn tài giỏi thì kệ bạn! Qua màn 3`
     }
 ]
