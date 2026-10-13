@@ -138,6 +138,7 @@ const app = {
             ball.y = paddle.y - ball.radius; // Đặt lại vị trí của bóng để tránh va chạm liên tục
             // this.states.score += 10;
 
+            // cộng điểm riêng
             const currentLevel = this.getCurrentLevel();
             if(currentLevel && currentLevel.onPaddleHit) {
                 currentLevel.onPaddleHit(this);

@@ -1,3 +1,5 @@
+import { hasCollisionObject } from "./utils.js";
+
 export const levels = [
     {
         level: 1,
@@ -22,7 +24,7 @@ export const levels = [
         },
 
         checkWin(app) {
-            return app.states.score >= 100;
+            return app.states.score >= 10;
         },
         aura_text: `Kiên nhẫn mới tạo ra kim cương! Qua màn 1`
     },
@@ -72,12 +74,7 @@ export const levels = [
             // xử lý va chạm giữa bóng và gạch, cộng điểm
             this.gach.forEach(g => {
                 if(g.alive) {
-                    const hitLeft = ball.x + ball.radius >= g.x;
-                    const hitRight = ball.x - ball.radius <= g.x + g.width;
-                    const hitTop = ball.y + ball.radius >= g.y;
-                    const hitBottom = ball.y - ball.radius <= g.y + g.height;
-
-                    if(hitLeft && hitRight && hitTop && hitBottom) {
+                    if(hasCollisionObject(ball, g)) {
                         g.alive = false;
 
                         ball.dy = -ball.dy;
@@ -103,6 +100,7 @@ export const levels = [
 
             if(this.apple) {
                 this.apple.y += this.apple.speed;
+
                 const hitX = this.apple.x >= paddle.x && 
                             this.apple.x <= paddle.x + paddle.width;
                 const hitY = this.apple.y + this.apple.radius >= paddle.y &&
@@ -113,7 +111,8 @@ export const levels = [
                     this.apple = null;
                 } else if(this.apple && this.apple.y - this.apple.radius > app.elements.tuong.height) {
                     this.apple = null;
-                    //
+                    app.handleGameOver();
+                    return;
                 }
             }
         },
@@ -171,8 +170,8 @@ export const levels = [
                 width: 80,
                 height: 35,
                 speedX: 4.5,
-                hp: 5,
-                maxHp: 5
+                hp: 1,
+                maxHp: 1
             }
         },
 
@@ -184,12 +183,8 @@ export const levels = [
             if(this.boss.x <= 0 || this.boss.x + this.boss.width >= app.elements.tuong.width) {
                 this.boss.speedX *= -1; // đảo chiều
             }
-            const hitBossX = ball.x + ball.radius >= this.boss.x &&
-                        ball.x - ball.radius <= this.boss.x + this.boss.width;
-            const hitBossY = ball.y + ball.radius >= this.boss.y &&
-                        ball.y - ball.radius <= this.boss.y + this.boss.height;
 
-            if(hitBossX && hitBossY) {
+            if(hasCollisionObject(ball, this.boss)) {
                 ball.dy = -ball.dy;
                 ball.y = this.boss.y + this.boss.height + ball.radius;
                 this.boss.hp -= 1;
@@ -266,6 +261,116 @@ export const levels = [
         checkWin(app) {
             return this.boss && this.boss.hp <= 0;
         },
-        aura_text: `Bạn tài giỏi thì kệ bạn! Qua màn 3`
+        aura_text: `! Qua màn 3`
+    },
+    {
+        level: 4,
+        missionText: "Nhiệm vụ: Vô hiệu hóa cổng đỏ kết nối với Làn Sóng Tai Ương bằng cách đi qua cổng vàng",
+        congA: null,
+        congB: null,
+        hasEnteredA: false,
+        isWin: false,
+        readyToWin: false,
+        winTimer: 0,
+
+        init(app) {
+            this.hasEnteredA = false;
+            this.isWin = false;
+            this.readyToWin = false;
+            this.winTimer = 0;
+
+            this.congA = {
+                x: 100,
+                y: 100,
+                radius: 30,
+                color: '#e4fe21'
+            };
+
+            this.congB = {
+                x: app.elements.tuong.width - 100,
+                y: 100,
+                radius: 30,
+                color: '#ff000d',
+                isDeactivated: false
+            };
+        },
+
+        update(app) {
+            const { ball } = app;
+            // đếm thời gian
+            if(this.isWin && !this.readyToWin) {
+                this.winTimer++;
+                if(this.winTimer >= 180) {
+                    this.readyToWin = true;
+                }
+                return;
+            }
+
+            if(this.readyToWin) true;
+
+            // Va chạm cổng A           
+            if(this.hasCollision(ball, this.congA)) {
+                if(!this.hasEnteredA) {
+                    this.hasEnteredA = true;
+
+                    ball.dy = -Math.abs(ball.dy);
+                    ball.dx = Math.abs(ball.speed);
+                }
+            }
+            // Đi qua cổng B
+            if(this.hasCollision(ball, this.congB)) {
+                if(this.hasEnteredA) {
+                    this.congB.color = '#00ff66';
+                    this.congB.isDeactivated = true;
+                    this.isWin = true;
+
+                    app.states.score += 30;
+                    if(app.elements.diem) {
+                        app.elements.diem.textContent = app.states.score;
+                    }
+                }
+                 else {
+                    app.handleGameOver();
+                }
+            }
+        },
+
+        hasCollision(ball, cong) {
+            const dist = Math.sqrt(Math.pow((ball.x-cong.x), 2) + Math.pow((ball.y-cong.y), 2));
+            return dist <= ball.radius + cong.radius;
+        },
+
+        draw(contextCv) {
+            contextCv.save();
+            contextCv.beginPath();
+            contextCv.arc(this.congA.x, this.congA.y, this.congA.radius, 0, Math.PI * 2);
+            contextCv.shadowColor = this.congA.color;
+            contextCv.shadowBlur = 20;
+            contextCv.lineWidth = 5;
+            contextCv.strokeStyle = this.congA.color;
+            contextCv.stroke();
+            contextCv.restore();
+
+            contextCv.save();
+            contextCv.beginPath();
+            contextCv.arc(this.congB.x, this.congB.y, this.congB.radius, 0, Math.PI * 2);
+            contextCv.shadowColor = this.congB.color;
+            contextCv.shadowBlur = this.congB.isDeactivated ? 40 : 20;
+            contextCv.lineWidth = 5;
+            contextCv.strokeStyle = this.congB.color;
+            contextCv.stroke();
+
+            if(this.congB.isDeactivated) {
+                contextCv.strokeStyle = '#00ff66';
+            }
+
+            contextCv.restore();
+        },
+
+        checkWin(app) {
+            return this.readyToWin;
+        },
+
+        aura_text: `! Qua màn 4`
     }
 ]
