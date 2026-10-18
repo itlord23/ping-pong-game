@@ -5,14 +5,38 @@ export const paddle = {
     height: 15,
     speed: 8,
     dx: 0,
+    isMirrorActive: false,
+    isLeftDown: false,
+    isRightDown: false,
 
     reset(width) {
         // cho nằm giữa
         this.x = (width - this.width) / 2;
         this.dx = 0;
+        this.isMirrorActive = false;
+        this.isLeftDown = false;
+        this.isRightDown = false;
     },
     
     update(width) {
+        let moveLeft = this.isLeftDown;
+        let moveRight = this.isRightDown;
+
+        if(this.isMirrorActive) {
+            const temp = moveLeft;
+            moveLeft = moveRight;
+            moveRight = temp;
+        }
+
+        // xác định vận tốc
+        if(moveLeft & !moveRight) {
+            this.dx = -this.speed;
+        } else if(moveRight && !moveLeft) {
+            this.dx = this.speed;
+        } else {
+            this.dx = 0;
+        }
+
         this.x += this.dx;
 
         if(this.x < 0) {
@@ -35,18 +59,12 @@ export const paddle = {
     },
 
     handleKeyDown(e) {
-        if(e.key === 'ArrowLeft' || e.key === 'a') paddle.dx = -paddle.speed;
-        if(e.key === 'ArrowRight' || e.key === 'd') paddle.dx = paddle.speed;
+        if(e.key === 'ArrowLeft' || e.key === 'a') this.isLeftDown = true;
+        if(e.key === 'ArrowRight' || e.key === 'd') this.isRightDown = true;
     },
 
     handleKeyUp(e) {
-        if (
-            e.key === 'ArrowLeft' ||
-            e.key === 'a' ||
-            e.key === 'ArrowRight' ||
-            e.key === 'd'
-        ) {
-            this.dx = 0;
-        }
+        if(e.key === 'ArrowLeft' || e.key === 'a') this.isLeftDown = false;
+        if(e.key === 'ArrowRight' || e.key === 'd') this.isRightDown = false;
     }
 }

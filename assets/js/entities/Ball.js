@@ -24,20 +24,17 @@ export const ball = {
         this.x += this.dx;
         this.y += this.dy;
 
-        if(this.x - this.radius <= 0 || this.x + this.radius >= width) {
-            this.dx = -this.dx;
-
-            if(this.x - this.radius <= 0) {
-                this.x = this.radius;
-            }
-            if(this.x + this.radius >= width) {
-                this.x = width - this.radius;
-            }
+        if(this.x - this.radius <= 0) {
+            this.x = this.radius;
+            this.dx = Math.abs(this.dx);
+        } else if(this.x + this.radius >= width) {
+            this.x = width - this.radius;
+            this.dx = -Math.abs(this.dx);
         }
 
         if(this.y - this.radius <= 0) {
-            this.dy = -this.dy;
             this.y = this.radius;
+            this.dy = Math.abs(this.dy);
         }
     },
 

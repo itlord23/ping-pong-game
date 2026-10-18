@@ -24,9 +24,9 @@ export const levels = [
         },
 
         checkWin(app) {
-            return app.states.score >= 10;
+            return app.states.score >= 100;
         },
-        aura_text: `Kiên nhẫn mới tạo ra kim cương! Qua màn 1`
+        aura_text: `Qua màn 1: Sơ Tâm (Tịnh giới)`
     },
     {
         level: 2,
@@ -91,7 +91,7 @@ export const levels = [
                                 x: g.x + g.width / 2,
                                 y: g.y + g.height,
                                 radius: 12,
-                                speed: 2.5 // tốc độ rơi
+                                speed: 3.5 // tốc độ rơi
                             }
                         }
                     }
@@ -153,11 +153,11 @@ export const levels = [
         checkWin(app) {
             return this.appleCollected;
         },
-        aura_text: `Gong Xi! Qua màn 2`
+        aura_text: `Qua màn 2: Phá lãng (Sóng cuộn)`
     },
     {
         level: 3,
-        missionText: 'Nhiệm vụ: Hạ gục con boss trước khi nó giết bạn',
+        missionText: 'Nhiệm vụ: Hạ gục con boss trước khi nó giết bạn!',
         boss: null,
         bullets: [],
         lastShotTime: 0,
@@ -170,8 +170,8 @@ export const levels = [
                 width: 80,
                 height: 35,
                 speedX: 4.5,
-                hp: 1,
-                maxHp: 1
+                hp: 5,
+                maxHp: 5
             }
         },
 
@@ -201,7 +201,7 @@ export const levels = [
             if(this.lastShotTime >= this.shootInterval) {
                 this.lastShotTime = 0;
                 this.bullets.push({
-                    x: this.boss.x + this.boss.width / 2 - 3,
+                    x: this.boss.x + (this.boss.width / 2) - 3,
                     y: this.boss.y + this.boss.height,
                     width: 6,
                     height: 15,
@@ -261,17 +261,19 @@ export const levels = [
         checkWin(app) {
             return this.boss && this.boss.hp <= 0;
         },
-        aura_text: `! Qua màn 3`
+        aura_text: `Qua màn 3: Lôi Động (Sấm sét)`
     },
     {
         level: 4,
-        missionText: "Nhiệm vụ: Vô hiệu hóa cổng đỏ kết nối với Làn Sóng Tai Ương bằng cách đi qua cổng vàng",
+        missionText: "Nhiệm vụ: Vô hiệu hóa cánh cổng đỏ kết nối với thế giới Hiện Thực chỉ khi đi qua cánh cổng vàng của Xi Wang",
         congA: null,
         congB: null,
         hasEnteredA: false,
         isWin: false,
         readyToWin: false,
         winTimer: 0,
+        timerA: 600,
+        isAExpired: false,
 
         init(app) {
             this.hasEnteredA = false;
@@ -282,7 +284,7 @@ export const levels = [
             this.congA = {
                 x: 100,
                 y: 100,
-                radius: 30,
+                radius: 15,
                 color: '#e4fe21'
             };
 
@@ -300,13 +302,15 @@ export const levels = [
             // đếm thời gian
             if(this.isWin && !this.readyToWin) {
                 this.winTimer++;
+                ball.dx = 0;
+                ball.dy = 0;
                 if(this.winTimer >= 180) {
                     this.readyToWin = true;
                 }
                 return;
             }
 
-            if(this.readyToWin) true;
+            if(this.readyToWin) return;
 
             // Va chạm cổng A           
             if(this.hasCollision(ball, this.congA)) {
@@ -371,6 +375,277 @@ export const levels = [
             return this.readyToWin;
         },
 
-        aura_text: `! Qua màn 4`
-    }
+        aura_text: `Qua màn 4: Nhiễu Mộng (Mương Ảo)`
+    },
+    {
+        level: 5,
+        missionText: "Cảnh báo: Phong ấn cổng Hiện Thực trước khi nó nuốt chửng mọi thứ!",
+        congA: null,
+        congB: null,
+        hasEnteredA: false,
+        isWin: false,
+        readyToWin: false,
+        winTimer: 0,
+
+        init(app) {
+            this.hasEnteredA = false;
+            this.isWin = false;
+            this.readyToWin = false;
+            this.winTimer = 0;
+
+            this.congA = {
+                x: 100,
+                y: 100,
+                radius: 15,
+                color: '#e4fe21'
+            };
+
+            this.congB = {
+                x: app.elements.tuong.width - 100,
+                y: 100,
+                radius: 30,
+                color: '#ff000d',
+                isDeactivated: false,
+                growthSpeed: 0.08
+            };
+        },
+
+        update(app) {
+            const { ball, paddle } = app;
+            // đếm thời gian
+            if(this.isWin && !this.readyToWin) {
+                this.winTimer++;
+                ball.dx = 0;
+                ball.dy = 0;
+                if(this.winTimer >= 180) {
+                    this.readyToWin = true;
+                }
+                return;
+            }
+
+            if(this.readyToWin) return;
+
+            this.congB.radius += this.congB.growthSpeed;
+
+            const distAB = Math.sqrt(Math.pow((this.congA.x-this.congB.x), 2) + Math.pow((this.congA.y-this.congB.y), 2));
+
+            const nuotA = this.congB.radius >= distAB;
+
+            const chamBeDo = (this.congB.y + this.congB.radius) >= paddle.y;
+
+            if(nuotA || chamBeDo) {
+                app.handleGameOver();
+                return;
+            }
+
+            // Va chạm cổng A           
+            if(this.hasCollision(ball, this.congA)) {
+                if(!this.hasEnteredA) {
+                    this.hasEnteredA = true;
+
+                    ball.dy = -Math.abs(ball.dy);
+                    ball.dx = Math.abs(ball.speed);
+                }
+            }
+            // Đi qua cổng B
+            if(this.hasCollision(ball, this.congB)) {
+                if(this.hasEnteredA) {
+                    this.congB.color = '#00ff66';
+                    this.congB.isDeactivated = true;
+                    this.isWin = true;
+
+                    app.states.score += 30;
+                    if(app.elements.diem) {
+                        app.elements.diem.textContent = app.states.score;
+                    }
+                }
+                 else {
+                    app.handleGameOver();
+                }
+            }
+        },
+
+        hasCollision(ball, cong) {
+            const dist = Math.sqrt(Math.pow((ball.x-cong.x), 2) + Math.pow((ball.y-cong.y), 2));
+            return dist <= ball.radius + cong.radius;
+        },
+
+        draw(contextCv) {
+            contextCv.save();
+            contextCv.beginPath();
+            contextCv.arc(this.congA.x, this.congA.y, this.congA.radius, 0, Math.PI * 2);
+            contextCv.shadowColor = this.congA.color;
+            contextCv.shadowBlur = 20;
+            contextCv.lineWidth = 5;
+            contextCv.strokeStyle = this.congA.color;
+            contextCv.stroke();
+            contextCv.restore();
+
+            contextCv.save();
+            contextCv.beginPath();
+            contextCv.arc(this.congB.x, this.congB.y, this.congB.radius, 0, Math.PI * 2);
+            contextCv.shadowColor = this.congB.color;
+            contextCv.shadowBlur = this.congB.isDeactivated ? 40 : 20;
+            contextCv.lineWidth = 5;
+            contextCv.strokeStyle = this.congB.color;
+            contextCv.stroke();
+
+            if(this.congB.isDeactivated) {
+                contextCv.strokeStyle = '#00ff66';
+            }
+
+            contextCv.restore();
+        },
+
+        checkWin(app) {
+            return this.readyToWin;
+        },
+
+        aura_text: `Qua màn 5: Cuồng Phong (Bão Giáp)`
+    },
+    {
+        level: 6,
+        missionText: "Màn cuối: Làm sao để đạt 150 điểm?",
+
+        isWin: false,
+        balls: [],
+        isMirrorActive: false,
+        tachBong: false,
+        targetScore: 150,
+        scoreGained: 0,
+
+        init(app) {
+            const { ball, paddle } = app;
+
+            this.isWin = false;
+            this.isMirrorActive = false;
+            this.tachBong = false;
+            this.scoreGained = 0;
+
+            if (ball) {
+                ball.x = paddle.x + paddle.width / 2;
+                ball.y = app.elements.tuong.height - 50;
+                ball.dx = 3.5;
+                ball.dy = -4;
+            }
+
+            this.balls = [ball];
+
+            paddle.isMirrorActive = false;
+        },
+
+        update(app) {
+            const { paddle } = app;
+
+            if(!this.tachBong && this.balls.length > 0 && this.balls[0].y < app.elements.tuong.height / 2) {
+                this.tachBong = true;
+                const b = this.balls[0];
+
+                // bóng tp
+                this.balls = [
+                    b,
+                    {
+                        x: b.x,
+                        y: b.y,
+                        dx: 3.5,
+                        dy: -4,
+                        radius: b.radius || 8,
+                        color: '#ffea00'
+                    },
+                    {
+                        x: b.x,
+                        y: b.y,
+                        dx: -3.5,
+                        dy: -4,
+                        radius: b.radius || 8,
+                        color: '#ffea00'
+                    },
+                ];
+            }
+            // có ít nhất 1 bóng nằm ở nửa trên
+            this.isMirrorActive = this.balls.some(b => b && b.y < app.elements.tuong.height / 2);
+            // xử lý chuyển động của thanh đỡ
+            paddle.isMirrorActive = this.isMirrorActive;
+
+            // update cho bóng tp
+            for (let index = 0; index < this.balls.length; index++) {
+                const b = this.balls[index];
+
+                if(index > 0) {
+                    b.x += b.dx;
+                    b.y += b.dy;
+
+                    // va chạm
+                    if(b.x - b.radius <= 0) {
+                        b.x = b.radius;
+                        b.dx = Math.abs(b.dx);
+                    } else if(b.x + b.radius >= app.elements.tuong.width) {
+                        b.x = app.elements.tuong.width - b.radius;
+                        b.dx = -Math.abs(b.dx);
+                    }
+
+                    if (b.y - b.radius <= 0) {
+                        b.y = b.radius;
+                        b.dy = Math.abs(b.dy);
+                    }
+                }
+                
+                const hitPaddleX = b.x >= paddle.x && b.x <= paddle.x + paddle.width;
+                const hitPaddleY = b.y + b.radius >= paddle.y && b.y - b.radius <= paddle.y + paddle.height;
+                if(hitPaddleX && hitPaddleY) {
+                    b.dy = -Math.abs(b.dy);
+
+                    this.scoreGained += 10;
+                    app.states.score += 10;
+                    if (app.elements.diem) {
+                        app.elements.diem.textContent = app.states.score;
+                    }
+
+                    if(this.scoreGained >= this.targetScore) {
+                        this.isWin = true;
+                    }
+                }
+
+                if(b.y - b.radius > app.elements.tuong.height) {
+                    if(!this.isWin) {
+                        app.handleGameOver();
+                        return;
+                    }
+                }
+            }
+        },
+
+        draw(contextCv) {
+            const width = contextCv.canvas.width;
+            const height = contextCv.canvas.height;
+            contextCv.save();
+            contextCv.beginPath();
+            contextCv.moveTo(0, height / 2);
+            contextCv.lineTo(width, height / 2);
+            contextCv.setLineDash([8, 8]);
+            contextCv.lineWidth = 2;
+            contextCv.strokeStyle = this.isMirrorActive ? '#ff0055' : 'rgba(255, 255, 255, 0.3)';
+            contextCv.stroke();
+            contextCv.restore();
+
+            const bongThem = this.balls.slice(1);
+
+            bongThem.forEach(b => {
+                contextCv.save();
+                contextCv.beginPath();
+                contextCv.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+                contextCv.fillStyle = b.color;
+                contextCv.shadowColor = b.color;
+                contextCv.shadowBlur = 10;
+                contextCv.fill();
+                contextCv.restore();
+            });
+        },
+
+        checkWin(app) {
+            return this.isWin;
+        },
+
+        aura_text: `Hoàn thành màn 6: Kính Hoa Thủy Nguyệt (Thế Giới Gương)`
+        }
 ]
